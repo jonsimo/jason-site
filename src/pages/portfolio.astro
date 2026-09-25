@@ -8,9 +8,14 @@ const filters = ['All', ...categories];
 ---
 <Base title="Portfolio" description="Selected photography, cinematography and creative direction by SightlessVision.">
   <div class="container-x pb-24 pt-32">
-    <header class="mb-14">
-      <p class="eyebrow animate-rise mb-3">Portfolio</p>
-      <h1 class="animate-rise font-heading text-4xl text-foreground md:text-6xl" style="--d:100ms">Body of Work</h1>
+    <header class="mb-14 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <p class="eyebrow eyebrow-line animate-rise mb-4">Portfolio</p>
+        <h1 class="font-heading text-5xl text-foreground md:text-7xl">
+          <span class="line-mask"><span style="--d:120ms">Body of <span class="italic">Work</span></span></span>
+        </h1>
+      </div>
+      <p class="animate-rise text-xs uppercase tracking-[0.3em] text-muted-foreground" style="--d:300ms"><span class="font-heading text-2xl normal-case tracking-normal text-foreground" data-visible-count>{String(projects.length).padStart(2, '0')}</span>&nbsp; Projects</p>
     </header>
 
     <div class="animate-rise mb-12 flex flex-wrap gap-3" style="--d:200ms" role="group" aria-label="Filter projects">
@@ -28,7 +33,7 @@ const filters = ['All', ...categories];
 
     <div class="columns-1 gap-6 md:columns-2 lg:columns-3" data-grid>
       {projects.map((p, i) => (
-        <ProjectCard project={p} index={i} eager={i < 3} sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" />
+        <ProjectCard project={p} index={i} number={i + 1} eager={i < 3} priority={i === 0} sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" />
       ))}
     </div>
     <p data-empty hidden class="py-20 text-center text-muted-foreground">Nothing here yet.</p>
@@ -40,6 +45,7 @@ const filters = ['All', ...categories];
   const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
   const cards = [...document.querySelectorAll<HTMLElement>('[data-grid] > figure')];
   const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const counter = document.querySelector<HTMLElement>('[data-visible-count]')!;
 
   function apply(cat: string, animate = true) {
     const run = () => {
@@ -51,6 +57,7 @@ const filters = ['All', ...categories];
         if (on) { shown++; c.classList.add('is-in'); }
       });
       empty.hidden = shown > 0;
+      counter.textContent = String(shown).padStart(2, '0');
     };
     // Smoothly re-flow the grid where the View Transitions API exists
     if (animate && 'startViewTransition' in document && !matchMedia('(prefers-reduced-motion: reduce)').matches) {

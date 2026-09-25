@@ -25,6 +25,7 @@ Requires Node 22.12+.
 
 - **Add a project:** drop a JPG into `src/assets/work/`, import it at the top of `site.ts`, add an entry to `projects`. Set `featured: true` to show it on the home page. Portrait/square images tile three-across on the home page; anything wider than ~1.4:1 runs full-width.
 - **Images:** commit the original (JPG, up to ~2400px long edge). The build generates AVIF + WebP at every size needed — never hand-optimise or upload pre-shrunk versions.
+- **Hero video (optional):** set `hero.video` to an MP4 (8–15 s loop, muted, ~5 MB). The hero image becomes its poster frame.
 - **Client logos:** transparent PNG, light-on-transparent works best (they render as subtle white marks on the dark background).
 - Anything marked `TODO` in `site.ts` is placeholder content carried over from the Base44 template.
 

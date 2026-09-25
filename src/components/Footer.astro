@@ -1,33 +1,35 @@
 ---
-import { site } from '../data/site';
-import { url } from '../lib/url';
+import { site, nav } from '../data/site';
+import { url, isActive } from '../lib/url';
 import Icon from './Icon.astro';
 
-const links = [
-  { label: 'Home', href: '/' },
-  { label: 'Portfolio', href: '/portfolio/' },
-  { label: 'Awards', href: '/awards/' },
-  { label: 'About', href: '/about/' },
-  { label: 'Contact', href: '/contact/' },
-];
 const socials = [
   { name: 'Instagram', icon: 'instagram', href: site.social.instagram || '#' },
   { name: 'YouTube', icon: 'youtube', href: site.social.youtube || '#' },
   { name: 'Email', icon: 'mail', href: `mailto:${site.email}` },
 ] as const;
+const city = site.location.split(',')[0];
+const onContact = isActive(Astro.url.pathname, '/contact/');
+const cta = onContact
+  ? { href: `mailto:${site.email}`, a: 'Say', b: 'hello' }
+  : { href: url('/contact/'), a: 'Start a', b: 'project' };
 ---
-<footer class="border-t border-border bg-background">
-  <div class="container-x py-16">
-    <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
-      <div>
-        <p class="mb-4 font-heading text-2xl text-foreground">{site.name}</p>
-        <p class="max-w-xs text-sm leading-relaxed text-muted-foreground">{site.footerBlurb}</p>
+<footer class="relative overflow-hidden border-t border-border bg-background">
+  <div class="container-x pt-20 md:pt-24">
+    <div class="grid grid-cols-1 gap-12 md:grid-cols-12">
+      <div class="md:col-span-5">
+        <p class="eyebrow eyebrow-line mb-6">Let's Create</p>
+        <a href={cta.href} class="group inline-block font-heading text-4xl leading-tight text-foreground md:text-5xl">
+          {cta.a} <span class="italic text-primary">{cta.b}</span>
+          <Icon name="arrow-right" size={28} strokeWidth={1.25} class="ml-2 inline-block -translate-y-1 transition-transform duration-500 group-hover:translate-x-2" />
+        </a>
+        <p class="mt-6 max-w-xs text-sm leading-relaxed text-muted-foreground">{site.footerBlurb}</p>
       </div>
 
-      <nav aria-label="Footer">
+      <nav aria-label="Footer" class="md:col-span-3 md:col-start-7">
         <h2 class="mb-5 text-xs uppercase tracking-widest text-muted-foreground">Navigation</h2>
         <ul class="flex flex-col gap-3">
-          {links.map((l) => (
+          {nav.map((l) => (
             <li>
               <a href={url(l.href)} class="text-sm text-secondary-foreground transition-colors hover:text-primary">{l.label}</a>
             </li>
@@ -35,10 +37,10 @@ const socials = [
         </ul>
       </nav>
 
-      <div>
+      <div class="md:col-span-3">
         <h2 class="mb-5 text-xs uppercase tracking-widest text-muted-foreground">Connect</h2>
         <ul class="flex gap-4">
-          {socials.filter((s) => s.href).map((s) => (
+          {socials.map((s) => (
             <li>
               <a href={s.href} class="text-muted-foreground transition-colors hover:text-primary" aria-label={s.name} {...(s.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>
                 <Icon name={s.icon} size={20} strokeWidth={2} />
@@ -47,13 +49,36 @@ const socials = [
           ))}
         </ul>
         <a href={`mailto:${site.email}`} class="mt-5 inline-block text-sm text-muted-foreground transition-colors hover:text-primary">{site.email}</a>
+        <p class="mt-6 text-xs uppercase tracking-widest text-muted-foreground">
+          {city} <span class="text-foreground/70 tabular-nums" data-clock data-tz={site.timeZone}>—</span>
+        </p>
       </div>
     </div>
+  </div>
 
-    <div class="mt-12 border-t border-border pt-8">
-      <p class="text-center text-xs tracking-wider text-muted-foreground">
-        © {new Date().getFullYear()} {site.name}. All rights reserved.
-      </p>
+  <!-- Oversized wordmark, cropped by the page edge -->
+  <div class="pointer-events-none mt-16 select-none md:mt-20" aria-hidden="true">
+    <div data-wordmark={site.name} class="whitespace-nowrap text-center font-heading text-[15.2vw] leading-[0.8] tracking-[-0.03em] text-foreground/[0.06] before:content-[attr(data-wordmark)]"></div>
+  </div>
+
+  <div class="container-x relative border-t border-border py-7">
+    <div class="flex flex-col items-center justify-between gap-4 text-xs tracking-wider text-muted-foreground md:flex-row">
+      <p>© {new Date().getFullYear()} {site.name}. All rights reserved.</p>
+      <a href="#main" class="group inline-flex items-center gap-2 uppercase tracking-widest transition-colors hover:text-primary">
+        Back to top
+        <Icon name="arrow-right" size={12} strokeWidth={2} class="-rotate-90 transition-transform group-hover:-translate-y-0.5" />
+      </a>
     </div>
   </div>
 </footer>
+
+<script>
+  // Live local time in the studio's city — small, human, premium-portfolio touch.
+  const el = document.querySelector<HTMLElement>('[data-clock]');
+  if (el) {
+    const fmt = new Intl.DateTimeFormat('en-CA', { hour: 'numeric', minute: '2-digit', timeZone: el.dataset.tz });
+    const tick = () => (el.textContent = fmt.format(new Date()));
+    tick();
+    setInterval(tick, 20_000);
+  }
+</script>

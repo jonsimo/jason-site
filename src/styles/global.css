@@ -50,6 +50,16 @@
     user-select: none;
     -webkit-user-drag: none;
   }
+  h1, h2, h3 {
+    text-wrap: balance;
+    font-feature-settings: 'kern', 'liga', 'dlig';
+  }
+  h1, h2 {
+    letter-spacing: -0.015em;
+  }
+  p {
+    text-wrap: pretty;
+  }
 }
 
 /* Scrollbar (same as original) */
@@ -65,6 +75,131 @@
 }
 @utility container-x {
   @apply mx-auto w-full max-w-7xl px-6 md:px-10;
+}
+/* Eyebrow with a hairline lead-in: ── 01  SELECTED WORKS */
+@utility eyebrow-line {
+  @apply inline-flex items-center gap-3;
+  &::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.7;
+  }
+}
+
+/* ── Headline line-mask reveal ────────────────────────────────
+   Each line slides up from behind its own mask — editorial title-card feel. */
+.line-mask {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.08em; /* keep descenders (g, y) inside the mask */
+  margin-bottom: -0.08em;
+}
+.line-mask > span {
+  display: inline-block;
+  animation: line-up 1.25s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes line-up {
+  from { transform: translateY(105%); }
+  to { transform: translateY(0); }
+}
+
+/* ── Photo placeholder + fade-in ──────────────────────────────
+   A blurred 24px preview sits behind every photo; the real image fades up once decoded. */
+.lqip {
+  background-size: cover;
+  background-position: center;
+}
+img[data-fade] {
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    scale 1.4s var(--ease-out-expo);
+}
+@media (scripting: enabled) {
+  img[data-fade]:not(.is-loaded) {
+    opacity: 0;
+  }
+}
+
+/* ── Scroll progress hairline (CSS scroll-driven, zero JS) ────── */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 1px;
+  z-index: 70;
+  background: var(--color-primary);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    animation: progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes progress { to { transform: scaleX(1); } }
+
+/* Hero parallax + fade as it scrolls away (progressive enhancement) */
+@supports (animation-timeline: view()) {
+  .hero-parallax {
+    animation: hero-drift linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+  .hero-content {
+    animation: hero-fade linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 70vh;
+  }
+}
+@keyframes hero-drift { to { transform: translateY(18%) scale(1.04); } }
+@keyframes hero-fade { to { opacity: 0; transform: translateY(-6%); } }
+
+/* Cinematic letterbox that opens on first load */
+.letterbox::before,
+.letterbox::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 13vh;
+  background: #000;
+  z-index: 5;
+  animation: letterbox-open 1.6s var(--ease-out-expo) 0.15s both;
+}
+.letterbox::before { top: 0; transform-origin: top; }
+.letterbox::after { bottom: 0; transform-origin: bottom; }
+@keyframes letterbox-open { to { transform: scaleY(0); } }
+
+/* "View" cursor bubble for project tiles (fine pointers only) */
+.cursor-view {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: color-mix(in oklab, var(--color-foreground) 92%, transparent);
+  color: var(--color-background);
+  font: 500 10px/1 var(--font-body);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  scale: 0;
+  transition: scale 0.45s var(--ease-out-expo);
+  mix-blend-mode: normal;
+}
+.cursor-view.is-on { scale: 1; }
+.has-view-cursor [data-cursor='view'] { cursor: none; }
+@media (hover: none), (pointer: coarse) {
+  .cursor-view { display: none; }
 }
 
 /* ── Scroll reveal (replaces framer-motion; ~0 KB) ───────────
@@ -193,5 +328,9 @@ dialog.lightbox[open] {
     scroll-behavior: auto !important;
   }
   [data-reveal] { opacity: 1 !important; translate: none !important; }
+  .line-mask > span { transform: none !important; }
+  .letterbox::before, .letterbox::after { display: none; }
+  .hero-parallax, .hero-content, .scroll-progress { animation: none !important; }
+  .cursor-view { display: none; }
   .grain::after { display: none; }
 }

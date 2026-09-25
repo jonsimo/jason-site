@@ -52,6 +52,7 @@ export const site = {
   description:
     'SightlessVision — Toronto-based photographer, cinematographer and creative director crafting visual narratives for brands and artists.',
   footerBlurb: 'Capturing stories through light, motion, and vision. Based in Toronto, working worldwide.',
+  timeZone: 'America/Toronto', // drives the live local-time in the footer
   location: 'Toronto, Ontario', // TODO: Contact page previously said "Los Angeles, California" — confirm.
   email: 'hello@lensandvision.com', // TODO: template placeholder domain — replace with a real inbox.
   phone: '+1 (310) 555-0192', // TODO: 555 placeholder number. Set to '' to hide the row.
@@ -81,6 +82,12 @@ export const nav = [
 
 export const hero = {
   image: goldenValley,
+  /**
+   * Optional showreel loop for the hero (muted, autoplay). Put an MP4 in
+   * /public (e.g. public/reel.mp4 → '/reel.mp4') or use a hosted URL.
+   * Keep it short (8–15s), 1080p, ~4–6 MB, no audio. The image above is the poster.
+   */
+  video: '' as string,
   alt: 'Dramatic mountain valley at golden hour',
   eyebrow: 'Photographer · Cinematographer · Creative Director',
   titleTop: 'Stories told',

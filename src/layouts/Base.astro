@@ -71,12 +71,14 @@ const speculation = {
     <script type="speculationrules" set:html={JSON.stringify(speculation)} />
   </head>
   <body class="flex min-h-dvh flex-col">
+    <div class="scroll-progress" aria-hidden="true"></div>
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">Skip to content</a>
     <Nav />
     <main id="main" class="flex-1">
       <slot />
     </main>
     <Footer />
+    <div class="cursor-view" aria-hidden="true">View</div>
 
     <script>
       // Scroll-reveal: one shared IntersectionObserver for every [data-reveal].
@@ -91,6 +93,36 @@ const speculation = {
         { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
       );
       document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+
+      // Photos fade up over their blurred placeholder once decoded.
+      document.querySelectorAll<HTMLImageElement>('img[data-fade]').forEach((img) => {
+        const done = () => img.classList.add('is-loaded');
+        if (img.complete && img.naturalWidth) done();
+        else {
+          img.addEventListener('load', done, { once: true });
+          img.addEventListener('error', done, { once: true });
+        }
+      });
+
+      // "View" cursor bubble over project tiles (desktop, fine pointer only).
+      const bubble = document.querySelector<HTMLElement>('.cursor-view');
+      if (bubble && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        document.documentElement.classList.add('has-view-cursor');
+        let x = 0, y = 0, tx = 0, ty = 0, raf = 0;
+        const loop = () => {
+          x += (tx - x) * 0.2;
+          y += (ty - y) * 0.2;
+          bubble.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+          raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.1 ? requestAnimationFrame(loop) : 0;
+        };
+        addEventListener('pointermove', (e) => {
+          tx = e.clientX; ty = e.clientY;
+          if (!bubble.classList.contains('is-on')) { x = tx; y = ty; }
+          bubble.classList.toggle('is-on', !!(e.target as Element).closest?.('[data-cursor="view"]'));
+          if (!raf) raf = requestAnimationFrame(loop);
+        }, { passive: true });
+        document.documentElement.addEventListener('pointerleave', () => bubble.classList.remove('is-on'));
+      }
     </script>
   </body>
 </html>

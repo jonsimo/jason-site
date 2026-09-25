@@ -5,7 +5,7 @@ import Icon from './Icon.astro';
 
 const { pathname } = Astro.url;
 ---
-<header id="site-nav" class="fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500 border-b border-transparent data-[scrolled]:border-border data-[scrolled]:bg-background/85 data-[scrolled]:backdrop-blur-md" style="view-transition-name: site-nav">
+<header id="site-nav" class="fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter,translate] duration-500 ease-[var(--ease-out-expo)] data-[hidden]:-translate-y-full border-b border-transparent data-[scrolled]:border-border data-[scrolled]:bg-background/85 data-[scrolled]:backdrop-blur-md" style="view-transition-name: site-nav">
   <nav class="container-x flex h-20 items-center justify-between" aria-label="Main">
     <a href={url('/')} class="font-heading text-2xl tracking-wide text-foreground transition-colors hover:text-primary">
       {site.name}
@@ -75,8 +75,19 @@ const { pathname } = Astro.url;
   const openIcon = header.querySelector<HTMLElement>('[data-icon-open]')!;
   const closeIcon = header.querySelector<HTMLElement>('[data-icon-close]')!;
 
-  // Solid background once the page scrolls (same behaviour as the original)
-  const onScroll = () => header.toggleAttribute('data-scrolled', window.scrollY > 50 || menu.hasAttribute('data-open'));
+  // Solid background once the page scrolls (same behaviour as the original);
+  // tucks away while scrolling down, returns the moment you scroll up.
+  let lastY = scrollY;
+  const onScroll = () => {
+    const y = scrollY;
+    const open = menu.hasAttribute('data-open');
+    header.toggleAttribute('data-scrolled', y > 50 || open);
+    if (Math.abs(y - lastY) > 6) {
+      header.toggleAttribute('data-hidden', !open && y > lastY && y > 320);
+      lastY = y;
+    }
+  };
+  header.addEventListener('focusin', () => header.removeAttribute('data-hidden'));
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 

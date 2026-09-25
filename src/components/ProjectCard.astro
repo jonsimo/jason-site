@@ -1,29 +1,42 @@
 ---
 import { Picture, getImage } from 'astro:assets';
 import type { Project } from '../data/site';
+import { lqip } from '../lib/lqip';
 
 interface Props {
   project: Project;
   sizes: string;
   index?: number;
+  /** Running number shown on the tile, e.g. 1 → "01" */
+  number?: number;
   eager?: boolean;
+  /** Mark the page's LCP image */
+  priority?: boolean;
   /** Optional fixed aspect (e.g. '3/4') — image is cover-cropped to it. Default: natural ratio. */
   aspect?: string;
   class?: string;
 }
-const { project, sizes, index = 0, eager = false, aspect, class: cls } = Astro.props;
+const { project, sizes, index = 0, number, eager = false, priority = false, aspect, class: cls } = Astro.props;
 const { image, title, category, alt, slug } = project;
 
 // Large version for the lightbox (and the no-JS link target)
 const full = await getImage({ src: image, width: Math.min(image.width, 2000), format: 'webp', quality: 82 });
 const widths = [400, 640, 900, 1200, image.width].filter((w, i, a) => w <= image.width && a.indexOf(w) === i);
+const placeholder = await lqip(image);
+const num = number !== undefined ? String(number).padStart(2, '0') : null;
 ---
-<figure class:list={['group break-inside-avoid', cls ?? 'mb-6']} data-reveal style={`--d:${(index % 3) * 90}ms`} data-category={category}>
+<figure
+  class:list={['group break-inside-avoid', cls ?? 'mb-6', (eager || priority) && 'animate-rise']}
+  data-reveal={eager || priority ? undefined : ''}
+  style={`--d:${(index % 3) * 90 + (eager || priority ? 250 : 0)}ms`}
+  data-category={category}
+>
   <a
     href={full.src}
-    class="relative block overflow-hidden rounded-sm bg-secondary"
-    style={aspect ? `aspect-ratio:${aspect}` : undefined}
+    class="lqip relative block overflow-hidden rounded-sm bg-secondary"
+    style={`${aspect ? `aspect-ratio:${aspect};` : ''}${placeholder ? `background-image:url(${placeholder})` : ''}`}
     data-lightbox
+    data-cursor="view"
     data-title={title}
     data-category={category}
     data-alt={alt}
@@ -37,15 +50,23 @@ const widths = [400, 640, 900, 1200, image.width].filter((w, i, a) => w <= image
       sizes={sizes}
       formats={['avif', 'webp']}
       quality={72}
-      loading={eager ? 'eager' : 'lazy'}
-      class:list={[aspect ? 'h-full object-cover' : 'h-auto', 'w-full transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-105']}
+      loading={eager || priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+      data-fade
+      onload="this.classList.add('is-loaded')"
+      class:list={[aspect ? 'h-full object-cover' : 'h-auto', 'relative w-full duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]']}
       style={`view-transition-name: work-${slug}; view-transition-class: work`}
     />
-    <div class="absolute inset-0 flex items-end bg-gradient-to-t from-background/90 via-background/10 to-transparent transition-all duration-500 [@media(hover:hover)]:bg-none [@media(hover:hover)]:group-hover:bg-background/40">
-      <figcaption class="p-5 transition-all duration-500 [@media(hover:hover)]:translate-y-4 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-visible:translate-y-0 [@media(hover:hover)]:group-focus-visible:opacity-100">
-        <p class="mb-1 text-[10px] uppercase tracking-[0.25em] text-primary">{category}</p>
-        <p class="font-heading text-lg text-foreground">{title}<span class="sr-only"> — open larger view</span></p>
-      </figcaption>
-    </div>
+    <!-- touch: always-on caption gradient; desktop: darken on hover -->
+    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-transparent transition-opacity duration-700 [@media(hover:hover)]:bg-gradient-to-t [@media(hover:hover)]:from-background/85 [@media(hover:hover)]:via-background/20 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-visible:opacity-100"></div>
+    {num && (
+      <span class="pointer-events-none absolute left-5 top-4 font-heading text-sm italic text-foreground/80 mix-blend-difference transition-opacity duration-500 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">{num}</span>
+    )}
+    <figcaption class="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 md:p-6">
+      <div class="transition-all duration-700 ease-[var(--ease-out-expo)] [@media(hover:hover)]:translate-y-3 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-visible:translate-y-0 [@media(hover:hover)]:group-focus-visible:opacity-100">
+        <p class="mb-1.5 text-[10px] uppercase tracking-[0.25em] text-primary">{category}</p>
+        <p class="font-heading text-lg text-foreground md:text-xl">{title}<span class="sr-only"> — open larger view</span></p>
+      </div>
+    </figcaption>
   </a>
 </figure>

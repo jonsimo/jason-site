@@ -64,7 +64,31 @@ Result: it feels like a single load-out, but each page is independently fast, sh
 - **SEO.** Per-page titles and descriptions, canonical URLs, an Open Graph / Twitter card (a 1200×630 crop generated from the hero), Person JSON-LD, a sitemap, robots.txt, a custom favicon and a branded 404 page.
 - **Fonts are self-hosted** instead of loaded from Google Fonts. That saves a third-party connection, removes the render-blocking request and avoids the GDPR issue. The headline fonts are preloaded.
 
-## 6. Content to confirm before launch
+## 6. Premium pass
+
+A second round focused on feel and craft. The layout and palette are unchanged, and everything below respects `prefers-reduced-motion`.
+
+- **Hero as a title card.** A cinematic letterbox opens on load. Each headline line rises from behind its own mask. The image settles in, then drifts at a slower speed than the page as you scroll (a CSS scroll-driven animation, no JS). A bottom rail shows the location, a scroll cue and "Working worldwide". It supports an optional muted showreel loop (`hero.video` in `site.ts`).
+- **Editorial type system.** Numbered section eyebrows with a hairline lead-in (`── 01  Selected Works`), larger headlines with italic accents, balanced heading wraps and tighter display tracking. The Portfolio and Awards headers show live counts.
+- **Photos never pop in.** Each image sits on a ~400-byte blurred preview generated at build time and fades up once decoded. Above-the-fold images load eagerly with high priority.
+- **Project tiles.** Running numbers, and a caption that slides up on hover. On desktop a "View" cursor bubble follows the pointer over tiles.
+- **Services.** Numbered columns with a gold hairline that draws across on hover.
+- **Navigation.** It tucks away while you scroll down and returns the moment you scroll up. A 1px gold scroll-progress line runs along the top of the viewport.
+- **CTA and footer.** A golden-hour glow behind "Have a project in mind?" and a pill button with a fill sweep. The footer has an oversized wordmark bleeding off the page edge, a "Start a project" link ("Say hello" on the Contact page), the live local time in Toronto, and a back-to-top link.
+
+Lighthouse, mobile (simulated slow 4G, local server without compression):
+
+| Page | Performance | Accessibility | Best Practices | SEO |
+|---|---|---|---|---|
+| Home | 97 | 100 | 100 | 100 |
+| Portfolio | 93 | 100 | 100 | 100 |
+| About | 96 | 100 | 100 | 100 |
+| Awards | 89 | 100 | 100 | 100 |
+| Contact | 100 | 100 | 100 | 100 |
+
+The remaining gap is web-font download time on the simulated connection. GitHub Pages' CDN and gzip bring real-world numbers in faster than this.
+
+## 7. Content to confirm before launch
 
 These are carried over as-is and flagged with `TODO` in `src/data/site.ts`:
 

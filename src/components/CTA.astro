@@ -2,19 +2,24 @@
 import { url } from '../lib/url';
 import Icon from './Icon.astro';
 ---
-<section class="container-x py-24 text-center md:py-32">
-  <div data-reveal>
-    <p class="eyebrow mb-4">Let's Create</p>
-    <h2 class="mb-6 font-heading text-4xl text-foreground md:text-6xl">
-      Have a project<br />
-      <span class="italic">in mind?</span>
-    </h2>
-    <p class="mx-auto mb-10 max-w-md text-base text-muted-foreground">
-      I'd love to hear about your vision. Let's bring your story to life together.
-    </p>
-    <a href={url('/contact/')} class="group inline-flex items-center gap-3 rounded-sm border border-border px-8 py-4 text-sm uppercase tracking-widest text-foreground transition-colors hover:border-primary hover:text-primary">
-      Get in Touch
-      <Icon name="arrow-right" size={16} strokeWidth={2} class="transition-transform group-hover:translate-x-1" />
-    </a>
+<section class="relative overflow-hidden">
+  <!-- soft golden-hour glow -->
+  <div class="pointer-events-none absolute left-1/2 top-1/2 h-[60vmin] w-[90vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]" aria-hidden="true"></div>
+  <div class="container-x relative py-28 text-center md:py-40">
+    <div data-reveal>
+      <p class="eyebrow mb-5">Let's Create</p>
+      <h2 class="mb-7 font-heading text-5xl leading-[0.95] text-foreground md:text-8xl">
+        Have a project<br />
+        <span class="italic text-primary">in mind?</span>
+      </h2>
+      <p class="mx-auto mb-12 max-w-md text-base text-muted-foreground">
+        I'd love to hear about your vision. Let's bring your story to life together.
+      </p>
+      <a href={url('/contact/')} class="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-foreground/20 px-9 py-4 text-sm uppercase tracking-widest text-foreground transition-colors duration-500 hover:border-primary hover:text-primary-foreground">
+        <span class="absolute inset-0 origin-bottom scale-y-0 rounded-full bg-primary transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-y-100"></span>
+        <span class="relative">Get in Touch</span>
+        <Icon name="arrow-right" size={16} strokeWidth={2} class="relative transition-transform group-hover:translate-x-1" />
+      </a>
+    </div>
   </div>
 </section>

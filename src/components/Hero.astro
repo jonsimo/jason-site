@@ -1,48 +1,79 @@
 ---
-import { hero } from '../data/site';
+import { hero, site } from '../data/site';
 import { url } from '../lib/url';
 import { getHeroSources, heroSizes as sizes } from '../lib/heroImage';
 import Icon from './Icon.astro';
 
 const { avif, webp, fallback } = await getHeroSources();
 ---
-<section class="relative h-svh min-h-[560px] w-full overflow-hidden">
-  <div class="grain absolute inset-0 overflow-hidden bg-[#2a1a10]">
-    <picture>
-      <source type="image/avif" srcset={avif.srcSet.attribute} sizes={sizes} />
-      <source type="image/webp" srcset={webp.srcSet.attribute} sizes={sizes} />
-      <img
-        src={fallback.src}
-        alt={hero.alt}
-        width={hero.image.width}
-        height={hero.image.height}
-        fetchpriority="high"
-        loading="eager"
-        decoding="async"
-        class="animate-settle h-full w-full object-cover"
-      />
-    </picture>
-    <div class="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background"></div>
+<section class="letterbox relative h-svh min-h-[600px] w-full overflow-hidden bg-[#1b120b]">
+  <!-- Image layer: settles in on load, drifts slower than the page on scroll -->
+  <div class="hero-parallax absolute inset-0 will-change-transform">
+    <div class="grain absolute inset-0 overflow-hidden">
+      {hero.video ? (
+        <video
+          class="animate-settle h-full w-full object-cover"
+          src={url(hero.video)}
+          poster={fallback.src}
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          aria-hidden="true"
+        />
+      ) : (
+        <picture>
+          <source type="image/avif" srcset={avif.srcSet.attribute} sizes={sizes} />
+          <source type="image/webp" srcset={webp.srcSet.attribute} sizes={sizes} />
+          <img
+            src={fallback.src}
+            alt={hero.alt}
+            width={hero.image.width}
+            height={hero.image.height}
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            class="animate-settle h-full w-full object-cover"
+          />
+        </picture>
+      )}
+    </div>
   </div>
+  <div class="absolute inset-0 bg-gradient-to-b from-background/60 via-background/25 to-background"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_80%,transparent_0%,rgb(10_10_10/0.55)_100%)]"></div>
 
-  <div class="container-x relative z-10 flex h-full flex-col justify-end pb-24 md:pb-32">
-    <p class="eyebrow animate-rise mb-4" style="--d:150ms">{hero.eyebrow}</p>
-    <h1 class="animate-rise mb-6 font-heading text-5xl leading-[0.95] text-foreground md:text-7xl lg:text-8xl" style="--d:250ms">
-      {hero.titleTop}<br />
-      <span class="italic text-primary">{hero.titleAccent}</span>
+  <div class="hero-content container-x relative z-10 flex h-full flex-col justify-end pb-24 md:pb-32">
+    <p class="eyebrow animate-rise mb-5" style="--d:700ms">{hero.eyebrow}</p>
+    <h1 class="mb-7 font-heading text-[clamp(3rem,9vw,8.5rem)] leading-[0.92] text-foreground">
+      <span class="line-mask"><span style="--d:500ms">{hero.titleTop}</span></span>
+      <span class="line-mask"><span class="italic text-primary" style="--d:640ms">{hero.titleAccent}</span></span>
     </h1>
-    <p class="animate-rise mb-10 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg" style="--d:400ms">{hero.body}</p>
-    <div class="animate-rise" style="--d:550ms">
-      <a href={url(hero.cta.href)} class="group inline-flex items-center gap-3 text-sm uppercase tracking-widest text-foreground transition-colors hover:text-primary">
-        {hero.cta.label}
-        <Icon name="arrow-right" size={16} strokeWidth={2} class="transition-transform group-hover:translate-x-1" />
+    <p class="animate-rise mb-10 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg" style="--d:850ms">{hero.body}</p>
+    <div class="animate-rise" style="--d:1000ms">
+      <a href={url(hero.cta.href)} class="group inline-flex items-center gap-4 text-sm uppercase tracking-widest text-foreground transition-colors hover:text-primary">
+        <span class="relative">
+          {hero.cta.label}
+          <span class="absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-primary transition-transform duration-500 group-hover:scale-x-100"></span>
+        </span>
+        <span class="grid h-10 w-10 place-items-center rounded-full border border-foreground/25 transition-all duration-500 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
+          <Icon name="arrow-right" size={15} strokeWidth={2} class="transition-transform duration-500 group-hover:translate-x-0.5" />
+        </span>
       </a>
     </div>
   </div>
 
-  <div class="pointer-events-none absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 md:block" aria-hidden="true">
-    <div class="animate-rise h-12 w-px overflow-hidden bg-foreground/15" style="--d:1100ms">
-      <div class="h-1/2 w-full animate-[scrollcue_2.2s_var(--ease-out-expo)_infinite] bg-primary"></div>
+  <!-- Bottom rail: location + scroll cue -->
+  <div class="hero-content pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden md:block">
+    <div class="container-x flex items-end justify-between pb-8">
+      <p class="animate-rise text-[10px] uppercase tracking-[0.3em] text-muted-foreground" style="--d:1300ms">{site.location}</p>
+      <div class="animate-rise flex flex-col items-center gap-3" style="--d:1300ms" aria-hidden="true">
+        <span class="text-[10px] uppercase tracking-[0.3em] text-muted-foreground [writing-mode:vertical-rl]">Scroll</span>
+        <div class="h-12 w-px overflow-hidden bg-foreground/15">
+          <div class="h-1/2 w-full animate-[scrollcue_2.2s_var(--ease-out-expo)_infinite] bg-primary"></div>
+        </div>
+      </div>
+      <p class="animate-rise text-[10px] uppercase tracking-[0.3em] text-muted-foreground" style="--d:1300ms">Working worldwide</p>
     </div>
   </div>
 </section>
