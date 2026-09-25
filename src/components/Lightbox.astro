@@ -1,0 +1,91 @@
+---
+import Icon from './Icon.astro';
+---
+<dialog class="lightbox" id="lightbox" aria-label="Image viewer">
+  <div class="relative flex h-full w-full flex-col items-center justify-center px-4 py-16 md:px-20" data-lb-stage>
+    <img data-lb-img alt="" class="max-h-full max-w-full select-none object-contain shadow-2xl transition-opacity duration-300" />
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 md:px-10">
+      <div>
+        <p data-lb-cat class="mb-1 text-[10px] uppercase tracking-[0.25em] text-primary"></p>
+        <p data-lb-title class="font-heading text-xl text-foreground md:text-2xl"></p>
+      </div>
+      <p data-lb-count class="text-xs tracking-widest text-muted-foreground"></p>
+    </div>
+    <button type="button" data-lb-close class="absolute right-4 top-4 p-3 text-muted-foreground transition-colors hover:text-foreground" aria-label="Close">
+      <Icon name="x" size={26} />
+    </button>
+    <button type="button" data-lb-prev class="absolute left-2 top-1/2 -translate-y-1/2 p-3 text-muted-foreground transition-colors hover:text-primary md:left-6" aria-label="Previous image">
+      <Icon name="chevron-left" size={34} strokeWidth={1.25} />
+    </button>
+    <button type="button" data-lb-next class="absolute right-2 top-1/2 -translate-y-1/2 p-3 text-muted-foreground transition-colors hover:text-primary md:right-6" aria-label="Next image">
+      <Icon name="chevron-right" size={34} strokeWidth={1.25} />
+    </button>
+  </div>
+</dialog>
+
+<script>
+  const dlg = document.getElementById('lightbox') as HTMLDialogElement;
+  const img = dlg.querySelector<HTMLImageElement>('[data-lb-img]')!;
+  const title = dlg.querySelector<HTMLElement>('[data-lb-title]')!;
+  const cat = dlg.querySelector<HTMLElement>('[data-lb-cat]')!;
+  const count = dlg.querySelector<HTMLElement>('[data-lb-count]')!;
+  let items: HTMLAnchorElement[] = [];
+  let i = 0;
+
+  // Only cycle through what's currently visible (respects portfolio filters)
+  const visible = () =>
+    [...document.querySelectorAll<HTMLAnchorElement>('a[data-lightbox]')].filter((a) => a.offsetParent !== null);
+
+  function show(n: number) {
+    i = (n + items.length) % items.length;
+    const a = items[i];
+    img.style.opacity = '0';
+    const next = new Image();
+    next.src = a.href;
+    next.decode().catch(() => {}).finally(() => {
+      img.src = a.href;
+      img.width = Number(a.dataset.w);
+      img.height = Number(a.dataset.h);
+      img.alt = a.dataset.alt ?? '';
+      img.style.opacity = '1';
+    });
+    title.textContent = a.dataset.title ?? '';
+    cat.textContent = a.dataset.category ?? '';
+    count.textContent = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+    // warm the neighbours
+    [i + 1, i - 1].forEach((k) => { const p = items[(k + items.length) % items.length]; if (p) new Image().src = p.href; });
+  }
+
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element).closest<HTMLAnchorElement>('a[data-lightbox]');
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    items = visible();
+    dlg.showModal();
+    document.documentElement.style.overflow = 'hidden';
+    show(items.indexOf(a));
+  });
+
+  dlg.addEventListener('close', () => {
+    document.documentElement.style.overflow = '';
+    img.removeAttribute('src');
+  });
+  dlg.querySelector('[data-lb-close]')!.addEventListener('click', () => dlg.close());
+  dlg.querySelector('[data-lb-prev]')!.addEventListener('click', () => show(i - 1));
+  dlg.querySelector('[data-lb-next]')!.addEventListener('click', () => show(i + 1));
+  // click on empty stage closes
+  dlg.querySelector('[data-lb-stage]')!.addEventListener('click', (e) => { if (e.target === e.currentTarget) dlg.close(); });
+  dlg.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') show(i + 1);
+    if (e.key === 'ArrowLeft') show(i - 1);
+  });
+
+  // Swipe on touch
+  let x0: number | null = null;
+  dlg.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') x0 = e.clientX; });
+  dlg.addEventListener('pointerup', (e) => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1));
+  });
+</script>

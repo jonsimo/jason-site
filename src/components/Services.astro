@@ -1,0 +1,17 @@
+---
+import { services } from '../data/site';
+import Icon from './Icon.astro';
+---
+<section class="border-y border-border bg-card">
+  <div class="container-x py-20 md:py-24">
+    <ul class="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8">
+      {services.map((s, i) => (
+        <li class="text-center md:text-left" data-reveal style={`--d:${i * 150}ms`}>
+          <Icon name={s.icon} size={32} class="mx-auto mb-5 text-primary md:mx-0" />
+          <h3 class="mb-3 font-heading text-xl text-foreground">{s.title}</h3>
+          <p class="text-sm leading-relaxed text-muted-foreground">{s.description}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

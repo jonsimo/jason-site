@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+
+const info = [
+  { icon: 'mail', label: 'Email', value: site.email, href: `mailto:${site.email}` },
+  { icon: 'phone', label: 'Phone', value: site.phone, href: site.phone ? `tel:${site.phone.replace(/[^+\d]/g, '')}` : '' },
+  { icon: 'map-pin', label: 'Location', value: site.location, href: '' },
+].filter((i) => i.value) as { icon: 'mail' | 'phone' | 'map-pin'; label: string; value: string; href: string }[];
+
+const socials = [
+  { name: 'Instagram', icon: 'instagram', href: site.social.instagram || '#' },
+  { name: 'YouTube', icon: 'youtube', href: site.social.youtube || '#' },
+] as const;
+---
+<Base title="Contact" description="Start a project with SightlessVision — photography, cinematography and creative direction.">
+  <div class="container-x pb-24 pt-32">
+    <div class="grid grid-cols-1 gap-16 lg:grid-cols-5 lg:gap-20">
+      <div class="lg:col-span-2">
+        <p class="eyebrow animate-rise mb-3">Contact</p>
+        <h1 class="animate-rise mb-6 font-heading text-4xl leading-tight text-foreground md:text-5xl" style="--d:100ms">
+          Let's start<br />
+          <span class="italic">something great</span>
+        </h1>
+        <p class="animate-rise mb-10 text-base leading-relaxed text-muted-foreground" style="--d:200ms">
+          Whether you have a project in mind, need creative direction, or just want to say hello — I'd love to hear from you.
+        </p>
+
+        <ul class="animate-rise mb-10 space-y-6" style="--d:300ms">
+          {info.map((item) => (
+            <li class="flex items-start gap-4">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-secondary">
+                <Icon name={item.icon} size={16} strokeWidth={2} class="text-primary" />
+              </div>
+              <div>
+                <p class="mb-0.5 text-xs uppercase tracking-widest text-muted-foreground">{item.label}</p>
+                {item.href
+                  ? <a href={item.href} class="text-sm text-foreground transition-colors hover:text-primary">{item.value}</a>
+                  : <p class="text-sm text-foreground">{item.value}</p>}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <div class="animate-rise" style="--d:400ms">
+          <p class="mb-4 text-xs uppercase tracking-widest text-muted-foreground">Follow</p>
+          <div class="flex gap-4">
+            {socials.map((s) => (
+              <a href={s.href} aria-label={s.name} class="flex h-10 w-10 items-center justify-center rounded-sm bg-secondary text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary" {...(s.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>
+                <Icon name={s.icon} size={16} strokeWidth={2} />
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="animate-rise lg:col-span-3" style="--d:200ms">
+        <div class="rounded-sm border border-border bg-card p-8 md:p-10">
+          <h2 class="mb-8 font-heading text-2xl text-foreground">Send a Message</h2>
+          <ContactForm />
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import AwardCard from '../components/AwardCard.astro';
+import Icon from '../components/Icon.astro';
+import { awarded, nominated } from '../data/site';
+
+const sections = [
+  { id: 'awarded', label: 'Awarded', icon: 'award', items: awarded },
+  { id: 'nominated', label: 'Nominated', icon: 'star', items: nominated },
+] as const;
+---
+<Base title="Awards" description="Awards and nominations for SightlessVision's photography, film and creative direction.">
+  <div class="container-x pb-24 pt-32">
+    <header class="mb-20">
+      <p class="eyebrow animate-rise mb-3">Recognition</p>
+      <h1 class="animate-rise font-heading text-4xl text-foreground md:text-6xl" style="--d:100ms">Awards &amp; Nominations</h1>
+    </header>
+
+    {sections.map((s, si) => (
+      <section class:list={[si === 0 && 'mb-20']} aria-labelledby={s.id}>
+        <div class="mb-10 flex items-center gap-4" data-reveal="fade">
+          <Icon name={s.icon} size={16} strokeWidth={2} class={s.id === 'awarded' ? 'text-primary' : 'text-muted-foreground'} />
+          <h2 id={s.id} class="font-heading text-2xl text-foreground md:text-3xl">{s.label}</h2>
+          <div class="h-px flex-1 bg-border"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {s.items.map((item, i) => <AwardCard item={item} index={i} type={s.id} />)}
+        </div>
+      </section>
+    ))}
+  </div>
+</Base>

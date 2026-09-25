@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import { clients } from '../data/site';
+
+// Optical sizing: wide wordmarks get less height, tall crests more,
+// so every logo carries roughly the same visual weight.
+const AREA = 64 * 64 * 1.9;
+const sized = clients.map((c) => {
+  const ratio = c.logo.width / c.logo.height;
+  const h = Math.round(Math.min(72, Math.max(22, Math.sqrt(AREA / ratio))));
+  return { ...c, h, w: Math.round(h * ratio) };
+});
+---
+<section class="border-y border-border py-14" aria-labelledby="clients-heading">
+  <p id="clients-heading" class="mb-10 text-center text-xs uppercase tracking-[0.3em] text-muted-foreground" data-reveal="fade">
+    Brands I've Worked With
+  </p>
+  <div class="marquee overflow-hidden" data-reveal="fade" style="--d:150ms">
+    <ul class="marquee-track flex w-max items-center" style={`--marquee-duration:${clients.length * 5}s`}>
+      {[false, true].map((dup) =>
+        sized.map((c) => (
+          <li class="flex shrink-0 items-center justify-center px-8 md:px-12" aria-hidden={dup ? 'true' : undefined}>
+            <Image
+              src={c.logo}
+              alt={dup ? '' : c.name}
+              width={c.w * 2}
+              height={c.h * 2}
+              style={`height:${c.h}px;width:auto`}
+              format="webp"
+              quality={80}
+              loading="lazy"
+              class="opacity-40 transition-opacity duration-300 hover:opacity-90"
+            />
+          </li>
+        ))
+      )}
+    </ul>
+  </div>
+</section>

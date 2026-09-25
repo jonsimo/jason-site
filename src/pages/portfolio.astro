@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { projects, categories } from '../data/site';
+
+const filters = ['All', ...categories];
+---
+<Base title="Portfolio" description="Selected photography, cinematography and creative direction by SightlessVision.">
+  <div class="container-x pb-24 pt-32">
+    <header class="mb-14">
+      <p class="eyebrow animate-rise mb-3">Portfolio</p>
+      <h1 class="animate-rise font-heading text-4xl text-foreground md:text-6xl" style="--d:100ms">Body of Work</h1>
+    </header>
+
+    <div class="animate-rise mb-12 flex flex-wrap gap-3" style="--d:200ms" role="group" aria-label="Filter projects">
+      {filters.map((cat, i) => (
+        <button
+          type="button"
+          data-filter={cat}
+          aria-pressed={i === 0 ? 'true' : 'false'}
+          class="rounded-sm border border-border px-5 py-2.5 text-xs uppercase tracking-widest text-muted-foreground transition-all duration-300 hover:border-foreground/30 hover:text-foreground aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-primary"
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <div class="columns-1 gap-6 md:columns-2 lg:columns-3" data-grid>
+      {projects.map((p, i) => (
+        <ProjectCard project={p} index={i} eager={i < 3} sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" />
+      ))}
+    </div>
+    <p data-empty hidden class="py-20 text-center text-muted-foreground">Nothing here yet.</p>
+  </div>
+  <Lightbox />
+</Base>
+
+<script>
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-grid] > figure')];
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+
+  function apply(cat: string, animate = true) {
+    const run = () => {
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === cat)));
+      let shown = 0;
+      cards.forEach((c) => {
+        const on = cat === 'All' || c.dataset.category === cat;
+        c.hidden = !on;
+        if (on) { shown++; c.classList.add('is-in'); }
+      });
+      empty.hidden = shown > 0;
+    };
+    // Smoothly re-flow the grid where the View Transitions API exists
+    if (animate && 'startViewTransition' in document && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.startViewTransition(run);
+    } else run();
+  }
+
+  buttons.forEach((b) =>
+    b.addEventListener('click', () => {
+      const cat = b.dataset.filter!;
+      apply(cat);
+      const u = new URL(location.href);
+      cat === 'All' ? u.searchParams.delete('category') : u.searchParams.set('category', cat.toLowerCase().replace(/ /g, '-'));
+      history.replaceState(null, '', u);
+    }),
+  );
+
+  // Deep-linkable filters: /portfolio/?category=cinematography
+  const q = new URL(location.href).searchParams.get('category');
+  const match = q && buttons.find((b) => b.dataset.filter!.toLowerCase().replace(/ /g, '-') === q);
+  if (match) apply(match.dataset.filter!, false);
+</script>

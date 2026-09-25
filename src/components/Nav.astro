@@ -1,0 +1,93 @@
+---
+import { site, nav } from '../data/site';
+import { url, isActive } from '../lib/url';
+import Icon from './Icon.astro';
+
+const { pathname } = Astro.url;
+---
+<header id="site-nav" class="fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500 border-b border-transparent data-[scrolled]:border-border data-[scrolled]:bg-background/85 data-[scrolled]:backdrop-blur-md" style="view-transition-name: site-nav">
+  <nav class="container-x flex h-20 items-center justify-between" aria-label="Main">
+    <a href={url('/')} class="font-heading text-2xl tracking-wide text-foreground transition-colors hover:text-primary">
+      {site.name}
+    </a>
+
+    <ul class="hidden items-center gap-10 md:flex">
+      {nav.map((link) => {
+        const active = isActive(pathname, link.href);
+        return (
+          <li>
+            <a
+              href={url(link.href)}
+              aria-current={active ? 'page' : undefined}
+              class:list={[
+                'relative font-body text-sm uppercase tracking-widest transition-colors duration-300',
+                'after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-500 hover:after:scale-x-100',
+                active ? 'text-primary after:scale-x-100' : 'text-muted-foreground hover:text-foreground',
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+
+    <button
+      type="button"
+      class="-mr-2 p-2 text-foreground md:hidden"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
+      aria-label="Open menu"
+      data-menu-toggle
+    >
+      <span data-icon-open><Icon name="menu" size={24} strokeWidth={2} /></span>
+      <span data-icon-close hidden><Icon name="x" size={24} strokeWidth={2} /></span>
+    </button>
+  </nav>
+
+  <div
+    id="mobile-menu"
+    class="grid grid-rows-[0fr] overflow-hidden border-b border-transparent bg-background/95 backdrop-blur-md transition-[grid-template-rows,border-color] duration-500 ease-[var(--ease-out-expo)] data-[open]:grid-rows-[1fr] data-[open]:border-border md:hidden"
+  >
+    <ul class="min-h-0 px-6">
+      {nav.map((link, i) => {
+        const active = isActive(pathname, link.href);
+        return (
+          <li class:list={[i === 0 && 'pt-4', i === nav.length - 1 && 'pb-6']}>
+            <a
+              href={url(link.href)}
+              aria-current={active ? 'page' : undefined}
+              class:list={['block py-2.5 font-body text-sm uppercase tracking-widest', active ? 'text-primary' : 'text-muted-foreground']}
+            >
+              {link.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</header>
+
+<script>
+  const header = document.getElementById('site-nav')!;
+  const toggle = header.querySelector<HTMLButtonElement>('[data-menu-toggle]')!;
+  const menu = document.getElementById('mobile-menu')!;
+  const openIcon = header.querySelector<HTMLElement>('[data-icon-open]')!;
+  const closeIcon = header.querySelector<HTMLElement>('[data-icon-close]')!;
+
+  // Solid background once the page scrolls (same behaviour as the original)
+  const onScroll = () => header.toggleAttribute('data-scrolled', window.scrollY > 50 || menu.hasAttribute('data-open'));
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  const setOpen = (open: boolean) => {
+    menu.toggleAttribute('data-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    openIcon.hidden = open;
+    closeIcon.hidden = !open;
+    onScroll();
+  };
+  toggle.addEventListener('click', () => setOpen(!menu.hasAttribute('data-open')));
+  addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
+</script>

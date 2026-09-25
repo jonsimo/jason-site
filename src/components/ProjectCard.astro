@@ -1,0 +1,51 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import type { Project } from '../data/site';
+
+interface Props {
+  project: Project;
+  sizes: string;
+  index?: number;
+  eager?: boolean;
+  /** Optional fixed aspect (e.g. '3/4') — image is cover-cropped to it. Default: natural ratio. */
+  aspect?: string;
+  class?: string;
+}
+const { project, sizes, index = 0, eager = false, aspect, class: cls } = Astro.props;
+const { image, title, category, alt, slug } = project;
+
+// Large version for the lightbox (and the no-JS link target)
+const full = await getImage({ src: image, width: Math.min(image.width, 2000), format: 'webp', quality: 82 });
+const widths = [400, 640, 900, 1200, image.width].filter((w, i, a) => w <= image.width && a.indexOf(w) === i);
+---
+<figure class:list={['group break-inside-avoid', cls ?? 'mb-6']} data-reveal style={`--d:${(index % 3) * 90}ms`} data-category={category}>
+  <a
+    href={full.src}
+    class="relative block overflow-hidden rounded-sm bg-secondary"
+    style={aspect ? `aspect-ratio:${aspect}` : undefined}
+    data-lightbox
+    data-title={title}
+    data-category={category}
+    data-alt={alt}
+    data-w={full.attributes.width ?? image.width}
+    data-h={full.attributes.height ?? image.height}
+  >
+    <Picture
+      src={image}
+      alt={alt}
+      widths={widths}
+      sizes={sizes}
+      formats={['avif', 'webp']}
+      quality={72}
+      loading={eager ? 'eager' : 'lazy'}
+      class:list={[aspect ? 'h-full object-cover' : 'h-auto', 'w-full transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-105']}
+      style={`view-transition-name: work-${slug}; view-transition-class: work`}
+    />
+    <div class="absolute inset-0 flex items-end bg-gradient-to-t from-background/90 via-background/10 to-transparent transition-all duration-500 [@media(hover:hover)]:bg-none [@media(hover:hover)]:group-hover:bg-background/40">
+      <figcaption class="p-5 transition-all duration-500 [@media(hover:hover)]:translate-y-4 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-visible:translate-y-0 [@media(hover:hover)]:group-focus-visible:opacity-100">
+        <p class="mb-1 text-[10px] uppercase tracking-[0.25em] text-primary">{category}</p>
+        <p class="font-heading text-lg text-foreground">{title}<span class="sr-only"> — open larger view</span></p>
+      </figcaption>
+    </div>
+  </a>
+</figure>

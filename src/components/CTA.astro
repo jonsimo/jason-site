@@ -1,0 +1,20 @@
+---
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+---
+<section class="container-x py-24 text-center md:py-32">
+  <div data-reveal>
+    <p class="eyebrow mb-4">Let's Create</p>
+    <h2 class="mb-6 font-heading text-4xl text-foreground md:text-6xl">
+      Have a project<br />
+      <span class="italic">in mind?</span>
+    </h2>
+    <p class="mx-auto mb-10 max-w-md text-base text-muted-foreground">
+      I'd love to hear about your vision. Let's bring your story to life together.
+    </p>
+    <a href={url('/contact/')} class="group inline-flex items-center gap-3 rounded-sm border border-border px-8 py-4 text-sm uppercase tracking-widest text-foreground transition-colors hover:border-primary hover:text-primary">
+      Get in Touch
+      <Icon name="arrow-right" size={16} strokeWidth={2} class="transition-transform group-hover:translate-x-1" />
+    </a>
+  </div>
+</section>

@@ -1,0 +1,55 @@
+---
+import { hero } from '../data/site';
+import { url } from '../lib/url';
+import { getHeroSources, heroSizes as sizes } from '../lib/heroImage';
+import Icon from './Icon.astro';
+
+const { avif, webp, fallback } = await getHeroSources();
+---
+<section class="relative h-svh min-h-[560px] w-full overflow-hidden">
+  <div class="grain absolute inset-0 overflow-hidden bg-[#2a1a10]">
+    <picture>
+      <source type="image/avif" srcset={avif.srcSet.attribute} sizes={sizes} />
+      <source type="image/webp" srcset={webp.srcSet.attribute} sizes={sizes} />
+      <img
+        src={fallback.src}
+        alt={hero.alt}
+        width={hero.image.width}
+        height={hero.image.height}
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
+        class="animate-settle h-full w-full object-cover"
+      />
+    </picture>
+    <div class="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background"></div>
+  </div>
+
+  <div class="container-x relative z-10 flex h-full flex-col justify-end pb-24 md:pb-32">
+    <p class="eyebrow animate-rise mb-4" style="--d:150ms">{hero.eyebrow}</p>
+    <h1 class="animate-rise mb-6 font-heading text-5xl leading-[0.95] text-foreground md:text-7xl lg:text-8xl" style="--d:250ms">
+      {hero.titleTop}<br />
+      <span class="italic text-primary">{hero.titleAccent}</span>
+    </h1>
+    <p class="animate-rise mb-10 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg" style="--d:400ms">{hero.body}</p>
+    <div class="animate-rise" style="--d:550ms">
+      <a href={url(hero.cta.href)} class="group inline-flex items-center gap-3 text-sm uppercase tracking-widest text-foreground transition-colors hover:text-primary">
+        {hero.cta.label}
+        <Icon name="arrow-right" size={16} strokeWidth={2} class="transition-transform group-hover:translate-x-1" />
+      </a>
+    </div>
+  </div>
+
+  <div class="pointer-events-none absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 md:block" aria-hidden="true">
+    <div class="animate-rise h-12 w-px overflow-hidden bg-foreground/15" style="--d:1100ms">
+      <div class="h-1/2 w-full animate-[scrollcue_2.2s_var(--ease-out-expo)_infinite] bg-primary"></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes scrollcue {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(200%); }
+  }
+</style>

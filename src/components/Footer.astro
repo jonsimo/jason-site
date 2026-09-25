@@ -1,0 +1,59 @@
+---
+import { site } from '../data/site';
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+
+const links = [
+  { label: 'Home', href: '/' },
+  { label: 'Portfolio', href: '/portfolio/' },
+  { label: 'Awards', href: '/awards/' },
+  { label: 'About', href: '/about/' },
+  { label: 'Contact', href: '/contact/' },
+];
+const socials = [
+  { name: 'Instagram', icon: 'instagram', href: site.social.instagram || '#' },
+  { name: 'YouTube', icon: 'youtube', href: site.social.youtube || '#' },
+  { name: 'Email', icon: 'mail', href: `mailto:${site.email}` },
+] as const;
+---
+<footer class="border-t border-border bg-background">
+  <div class="container-x py-16">
+    <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
+      <div>
+        <p class="mb-4 font-heading text-2xl text-foreground">{site.name}</p>
+        <p class="max-w-xs text-sm leading-relaxed text-muted-foreground">{site.footerBlurb}</p>
+      </div>
+
+      <nav aria-label="Footer">
+        <h2 class="mb-5 text-xs uppercase tracking-widest text-muted-foreground">Navigation</h2>
+        <ul class="flex flex-col gap-3">
+          {links.map((l) => (
+            <li>
+              <a href={url(l.href)} class="text-sm text-secondary-foreground transition-colors hover:text-primary">{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div>
+        <h2 class="mb-5 text-xs uppercase tracking-widest text-muted-foreground">Connect</h2>
+        <ul class="flex gap-4">
+          {socials.filter((s) => s.href).map((s) => (
+            <li>
+              <a href={s.href} class="text-muted-foreground transition-colors hover:text-primary" aria-label={s.name} {...(s.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>
+                <Icon name={s.icon} size={20} strokeWidth={2} />
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a href={`mailto:${site.email}`} class="mt-5 inline-block text-sm text-muted-foreground transition-colors hover:text-primary">{site.email}</a>
+      </div>
+    </div>
+
+    <div class="mt-12 border-t border-border pt-8">
+      <p class="text-center text-xs tracking-wider text-muted-foreground">
+        © {new Date().getFullYear()} {site.name}. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>

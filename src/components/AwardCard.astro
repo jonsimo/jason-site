@@ -1,0 +1,37 @@
+---
+import { Picture } from 'astro:assets';
+import type { AwardItem } from '../data/site';
+import Icon from './Icon.astro';
+
+interface Props { item: AwardItem; index: number; type: 'awarded' | 'nominated' }
+const { item, index, type } = Astro.props;
+const won = type === 'awarded';
+---
+<article
+  class="group grid grid-cols-1 overflow-hidden rounded-sm border border-border bg-card transition-colors duration-300 hover:border-primary/40 md:grid-cols-2"
+  data-reveal
+  style={`--d:${(index % 2) * 90}ms`}
+>
+  <div class="aspect-[4/3] overflow-hidden">
+    <Picture
+      src={item.image}
+      alt={item.project}
+      widths={[400, 640, 900]}
+      sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+      formats={['avif', 'webp']}
+      quality={70}
+      loading="lazy"
+      class="h-full w-full object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-105"
+    />
+  </div>
+  <div class="flex flex-col justify-center p-7 md:p-8">
+    <div class="mb-4 flex items-center gap-2">
+      <Icon name={won ? 'award' : 'star'} size={14} strokeWidth={2} class:list={['shrink-0', won ? 'text-primary' : 'text-muted-foreground']} />
+      <span class:list={['text-[10px] uppercase tracking-[0.25em]', won ? 'text-primary' : 'text-muted-foreground']}>{won ? 'Awarded' : 'Nominated'}</span>
+    </div>
+    <p class="mb-2 text-xs uppercase tracking-widest text-muted-foreground">{item.year}</p>
+    <h3 class="mb-2 font-heading text-xl leading-snug text-foreground md:text-2xl">{item.title}</h3>
+    <p class="mb-1 text-sm text-primary">{item.organization}</p>
+    <p class="text-sm text-muted-foreground">{item.project}</p>
+  </div>
+</article>

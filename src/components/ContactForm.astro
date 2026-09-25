@@ -1,0 +1,98 @@
+---
+import { site } from '../data/site';
+import Icon from './Icon.astro';
+
+const field =
+  'w-full rounded-md border border-border bg-secondary px-3 text-base text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 md:text-sm';
+const label = 'mb-2 block text-xs uppercase tracking-widest text-muted-foreground';
+---
+<form
+  class="space-y-6"
+  data-contact-form
+  data-endpoint={site.formEndpoint}
+  data-email={site.email}
+  action={site.formEndpoint || `mailto:${site.email}`}
+  method="post"
+  enctype={site.formEndpoint ? undefined : 'text/plain'}
+>
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div>
+      <label for="cf-name" class={label}>Name</label>
+      <input id="cf-name" name="name" required autocomplete="name" placeholder="Your name" class:list={[field, 'h-12']} />
+    </div>
+    <div>
+      <label for="cf-email" class={label}>Email</label>
+      <input id="cf-email" name="email" type="email" required autocomplete="email" placeholder="your@email.com" class:list={[field, 'h-12']} />
+    </div>
+  </div>
+  <div>
+    <label for="cf-type" class={label}>Project Type</label>
+    <input id="cf-type" name="project_type" placeholder="e.g. Brand Campaign, Music Video, Editorial" class:list={[field, 'h-12']} />
+  </div>
+  <div>
+    <label for="cf-message" class={label}>Message</label>
+    <textarea id="cf-message" name="message" required rows="5" placeholder="Tell me about your project..." class:list={[field, 'resize-none py-3']}></textarea>
+  </div>
+  <!-- spam honeypot: humans never see this -->
+  <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+
+  <p data-error hidden class="text-sm text-red-400" role="alert"></p>
+
+  <button type="submit" class="inline-flex h-12 min-w-52 items-center justify-center gap-2 rounded-md bg-primary px-8 text-sm uppercase tracking-widest text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:opacity-60">
+    <span data-idle class="inline-flex items-center gap-2"><Icon name="send" size={14} strokeWidth={2} /> Send Message</span>
+    <span data-busy hidden class="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground"></span>
+  </button>
+</form>
+
+<div data-sent hidden class="flex flex-col items-center justify-center py-16 text-center" role="status">
+  <Icon name="circle-check" size={48} strokeWidth={2} class="mb-5 text-primary" />
+  <h3 class="mb-2 font-heading text-2xl text-foreground" data-sent-title>Message Sent</h3>
+  <p class="text-sm text-muted-foreground" data-sent-body>Thank you for reaching out. I'll get back to you soon.</p>
+</div>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]')!;
+  const sent = document.querySelector<HTMLElement>('[data-sent]')!;
+  const err = form.querySelector<HTMLElement>('[data-error]')!;
+  const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+  const busy = (on: boolean) => {
+    btn.disabled = on;
+    btn.querySelector<HTMLElement>('[data-idle]')!.hidden = on;
+    btn.querySelector<HTMLElement>('[data-busy]')!.hidden = !on;
+  };
+  const done = (title?: string, body?: string) => {
+    if (title) sent.querySelector('[data-sent-title]')!.textContent = title;
+    if (body) sent.querySelector('[data-sent-body]')!.textContent = body;
+    form.hidden = true;
+    sent.hidden = false;
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.hidden = true;
+    const data = new FormData(form);
+    if (data.get('_gotcha')) return; // bot
+    const endpoint = form.dataset.endpoint;
+
+    if (!endpoint) {
+      // No form service configured → open the visitor's email app, pre-filled.
+      const subject = `New enquiry${data.get('project_type') ? ` — ${data.get('project_type')}` : ''} from ${data.get('name')}`;
+      const body = `${data.get('message')}\n\n— ${data.get('name')} (${data.get('email')})`;
+      location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      done('Almost there', 'Your email app should have opened with the message ready — just hit send.');
+      return;
+    }
+
+    busy(true);
+    try {
+      const res = await fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error(String(res.status));
+      done();
+    } catch {
+      err.textContent = `Something went wrong sending your message. Please email ${form.dataset.email} directly.`;
+      err.hidden = false;
+    } finally {
+      busy(false);
+    }
+  });
+</script>
