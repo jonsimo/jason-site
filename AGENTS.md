@@ -12,6 +12,7 @@ Base44 export lives in git history at tag `base44-export` — reference only, do
 - `npm ci` — install (Node 22.12+, see `.nvmrc`)
 - `npm run dev` — local dev server at http://localhost:4321/jason-site/ (path includes the base!)
 - `npm run build` — production build to `dist/` (must pass before every commit)
+- `npm run verify` — after a build: checks every internal link/image resolves under the base path
 - `npm run preview` — serve the built `dist/`
 
 ## Where things live
@@ -41,7 +42,7 @@ Base44 export lives in git history at tag `base44-export` — reference only, do
 6. **Accessibility:** keep alt text on every image, labels on form fields, `aria-label` on icon-only links/buttons,
    visible focus states.
 7. Don't edit `package-lock.json` by hand; don't upgrade major versions (Astro/Tailwind) unless asked.
-8. Before committing: `npm run build` must succeed with no errors. Keep commits small with clear messages.
+8. Before committing: `npm run build` and `npm run verify` must both pass. Keep commits small with clear messages.
 
 ## Deploy / hosting facts
 - Pages source must be **GitHub Actions** (repo Settings → Pages).
@@ -49,6 +50,22 @@ Base44 export lives in git history at tag `base44-export` — reference only, do
   so renaming/moving the repo just works. For a custom domain: set `BASE_PATH: /` and `SITE_URL` in the workflow.
 - Contact form: GitHub Pages has no server. Set `site.formEndpoint` (Formspree / Web3Forms) in `site.ts`;
   otherwise it falls back to opening the visitor's email app.
+
+## Skills (`.agents/skills/`)
+Step-by-step playbooks for the recurring jobs on this site. Use the matching one instead of improvising:
+
+| Skill | Use when |
+|---|---|
+| `update-site-content` | changing any text/facts: contact info, bio, services, stats, awards, logos, nav |
+| `add-portfolio-project` | adding/replacing/removing/featuring portfolio or award images |
+| `update-hero-media` | new hero image or a looping showreel video |
+| `setup-contact-form` | making the contact form deliver email (Formspree / Web3Forms) |
+| `change-site-address` | repo moved/renamed, or connecting a custom domain |
+| `add-page` | new page or section in the existing design language |
+| `verify-and-deploy` | **end of every change**: build → verify → commit → push → confirm live |
+
+The owner is a photographer, not a developer: explain in plain English, ask before guessing facts,
+and show `npm run preview` before pushing visual changes.
 
 ## Common tasks
 - **Add a project:** add JPG to `src/assets/work/`, import it in `site.ts`, add to `projects[]`

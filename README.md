@@ -14,6 +14,7 @@ Same look as the Base44 version — same palette, type (Playfair Display + Inter
 npm install
 npm run dev        # http://localhost:4321/jason-site/
 npm run build      # outputs static site to dist/
+npm run verify     # checks every link/image in dist/ resolves
 npm run preview    # serve dist/ locally
 ```
 
@@ -63,6 +64,10 @@ src/
   styles/global.css     ← design tokens + animations
   lib/                  ← url() helper, hero image pipeline
 ```
+
+## Working with AI coding agents (Codex, Claude Code)
+
+Project rules are in [`AGENTS.md`](AGENTS.md); step-by-step playbooks for common jobs are in [`.agents/skills/`](.agents/skills). Agents pick these up automatically.
 
 ## What changed from the Base44 export
 
